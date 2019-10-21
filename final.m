@@ -1,0 +1,1 @@
+a = importdata("glass.data");
