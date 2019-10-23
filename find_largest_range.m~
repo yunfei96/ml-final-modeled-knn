@@ -16,7 +16,7 @@ end
 
 number = 0;
 %loop again to find which point is located in that region and mark visit
-for i = 1:length(data)
+for i = i:len(dagta)
     if pdist2(data(i,:), point) < range
         %mark visit
         visit(i)  = 1;

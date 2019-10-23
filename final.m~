@@ -33,27 +33,13 @@ test = [];
 %find in range and push into
 result = [];
 
-closest = intmax;
-
+min = [];
 for i = 1:length(result_model)
     center = result_model(i,2:10);
     cat = result_model(i,12);
     range = result_model(i,11);
-    
-    %find the cloest
-    if pdist2(center, test) < closest
-        
-    end
-    
-    %find anything in range
     if pdist2(center, test) <= range
          result = [result; result_model(i,:)];
     end
 end
-
-%if inrange == 0 
-
-%if inrange == 1
-
-%if inrange >= 1
 
