@@ -16,11 +16,17 @@ end
 
 number = 0;
 %loop again to find which point is located in that region and mark visit
+sim = 0;
 for i = 1:length(data)
     if pdist2(data(i,:), point) < range
         %mark visit
         visit(i)  = 1;
         number = number +1;
-    end
-        
+        if pdist2(data(i,:), point) > sim
+            sim = pdist2(data(i,:), point);
+        end
+    end 
 end
+
+range = sim;       
+

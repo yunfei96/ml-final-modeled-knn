@@ -1,18 +1,29 @@
 %get the input data
-raw_data = importdata("glass.data");
-%
-data = raw_data(:,2:10);
-num_data = length(data);
-label = raw_data(:,11);
-visit = zeros(num_data,1);
+f1 = importdata("f1.data");
+f2 = importdata("f2.data");
+f3 = importdata("f3.data");
+f4 = importdata("f4.data");
+f5 = importdata("f5.data");
+%implement 5 fold
+train = [f1;f2;f3;f4];
+test = f5;
+%set up test data
+test_data = test(:,2:10);
+num_test_data = length(test_data);
+test_label = test(:,11);
+%set  up train data
+train_data = train(:,2:10);
+num_train_data = length(train_data);
+train_label = train(:,11);
+visit = zeros(num_train_data,1);
 model = [];
 
 %loop through each data
-for i = 1:num_data
+for i = 1:num_train_data
     if visit(i) ~= 1
-        point = data(i,:);
-        cat = label(i);
-        [number, center, range, visit] = find_largest_range(point, cat , data, label, visit);
+        point = train_data(i,:);
+        cat = train_label(i);
+        [number, center, range, visit] = find_largest_range(point, cat , train_data, train_label, visit);
         model = [model; [number, center, range, cat]];
     end
     
@@ -21,39 +32,62 @@ end
 result_model = [];
 %eliminate small point
 for i = 1:length(model)
-    if model(i) > 2 
+    if model(i) > 2
         result_model = [result_model; model(i,:)];
     end 
 end
 
-%test data should be there 
-test = [];
-
 %prediction
-%find in range and push into
-result = [];
+predict_label = [];
 
-closest = intmax;
 
-for i = 1:length(result_model)
-    center = result_model(i,2:10);
-    cat = result_model(i,12);
-    range = result_model(i,11);
+for i=1:num_test_data
+    %find in range and push into
+    result = [];
+    closest_dis = intmax;
+    closest_cat  = [];
+    for j = 1: size(result_model)
+        center = result_model(j,2:10);
+        cat = result_model(j,12);
+        range = result_model(j,11);
     
-    %find the cloest
-    if pdist2(center, test) < closest
-        
-    end
+        %find the cloest
+        if pdist2(center, test_data(i,:))-range < closest_dis
+            closest_dis = pdist2(center, test_data(i,:))-range;
+            closest_cat = cat;
+        end
     
-    %find anything in range
-    if pdist2(center, test) <= range
-         result = [result; result_model(i,:)];
+        %find anything in range
+        if pdist2(center, test_data(i,:)) <= range
+            result = [result; result_model(j,:)];
+        end
     end
+    %if inrange == 0 or inrange >= 1
+    [l, r] = size(result);
+    if l==0
+        predict_label = [predict_label;closest_cat];
+    else
+        max = 0;
+        max_cat = 0;
+        for k = 1:l
+            if result(k,1) > max
+                max = result(k,1);
+                max_cat = result(k,12);
+            end
+        end
+        predict_label = [predict_label; max_cat];
+    end
+
 end
 
-%if inrange == 0 
 
-%if inrange == 1
 
-%if inrange >= 1
+cm = confusionmat(test_label,predict_label)
+accuracy = sum(diag (cm))/ sum(sum(cm))
 
+
+Idx = knnsearch(train_data,test_data);
+pl = train_label(Idx);
+
+cm = confusionmat(test_label,pl)
+accuracy = sum(diag (cm))/ sum(sum(cm))
