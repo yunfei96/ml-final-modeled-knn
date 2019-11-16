@@ -5,8 +5,22 @@ f3 = importdata("f3.data");
 f4 = importdata("f4.data");
 f5 = importdata("f5.data");
 %implement 5 fold
-train = [f1;f2;f3;f4];
-test = f5;
+%train = [f1;f2;f3;f4];
+%test = f5;
+data = [f1;f2;f3;f4;f5];
+folds = 5;
+interval = floor(length(data) / folds);
+final_list = []
+knn_accuracy = []
+for j=1:folds
+    left = (j - 1) * interval + 1;
+    if j == folds
+        right = length(data);
+    else
+        right = left + interval - 1;
+    end
+    test = data(left : right, :);
+    train = [data(1 : left - 1, :); data(right + 1 : length(data), :)];
 %set up test data
 test_data = test(:,2:10);
 num_test_data = length(test_data);
@@ -91,3 +105,20 @@ pl = train_label(Idx);
 
 cm = confusionmat(test_label,pl)
 accuracy = sum(diag (cm))/ sum(sum(cm))
+final_list(length(final_list) + 1) = accuracy
+Mdl = fitcknn(train_data, train_label,'NumNeighbors',2);
+pre = predict(Mdl,test_data)
+count = 0;
+for i=1:length(pre)
+      if(pre(i)==test_label(i))
+          count = count + 1;
+      end
+end
+knn_accuracy(length(knn_accuracy) + 1) = count / length(test_label);
+end
+
+disp("--------------------")
+final_list
+mean(final_list)
+knn_accuracy
+mean(knn_accuracy)
