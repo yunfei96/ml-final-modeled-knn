@@ -5,9 +5,14 @@ f3 = importdata("f3.data");
 f4 = importdata("f4.data");
 f5 = importdata("f5.data");
 %implement 5 fold
-%train = [f1;f2;f3;f4];
-%test = f5;
-data = [f1;f2;f3;f4;f5];
+%data = importdata("australian.dat"); %1-14, 15
+%data = [f1;f2;f3;f4;f5];
+% load fisheriris
+% X = meas;
+% Y = species;
+% Y = grp2idx(Y)
+% data = [X, Y]
+data = importdata("page-blocks.data");
 folds = 5;
 interval = floor(length(data) / folds);
 final_list = []
@@ -22,11 +27,11 @@ for j=1:folds
     test = data(left : right, :);
     train = [data(1 : left - 1, :); data(right + 1 : length(data), :)];
 %set up test data
-test_data = test(:,2:10);
+test_data = test(:,1:10);
 num_test_data = length(test_data);
 test_label = test(:,11);
 %set  up train data
-train_data = train(:,2:10);
+train_data = train(:,1:10);
 num_train_data = length(train_data);
 train_label = train(:,11);
 visit = zeros(num_train_data,1);
@@ -46,7 +51,7 @@ end
 result_model = [];
 %eliminate small point
 for i = 1:length(model)
-    if model(i) > 2
+    if model(i) > 1
         result_model = [result_model; model(i,:)];
     end 
 end
@@ -61,9 +66,9 @@ for i=1:num_test_data
     closest_dis = intmax;
     closest_cat  = [];
     for j = 1: size(result_model)
-        center = result_model(j,2:10);
-        cat = result_model(j,12);
-        range = result_model(j,11);
+        center = result_model(j,2:11);
+        cat = result_model(j,13);
+        range = result_model(j,12);
     
         %find the cloest
         if pdist2(center, test_data(i,:))-range < closest_dis
@@ -86,7 +91,7 @@ for i=1:num_test_data
         for k = 1:l
             if result(k,1) > max
                 max = result(k,1);
-                max_cat = result(k,12);
+                max_cat = result(k,13);
             end
         end
         predict_label = [predict_label; max_cat];
@@ -106,7 +111,7 @@ pl = train_label(Idx);
 cm = confusionmat(test_label,pl)
 accuracy = sum(diag (cm))/ sum(sum(cm))
 final_list(length(final_list) + 1) = accuracy
-Mdl = fitcknn(train_data, train_label,'NumNeighbors',2);
+Mdl = fitcknn(train_data, train_label,'NumNeighbors',1);
 pre = predict(Mdl,test_data)
 count = 0;
 for i=1:length(pre)
